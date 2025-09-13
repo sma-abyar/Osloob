@@ -1,6 +1,12 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 
+const BASE = import.meta.env.BASE_URL.replace(/\/+$/, ""); // حذف / انتهایی
+const toPath = (p: string) => (p.startsWith("/") ? `${BASE}${p}` : `${BASE}/${p}`);
+const rulesUrl = (id: string) => `${BASE}/rules/${encodeURIComponent(id)}`;
+const homeUrl  = () => `${BASE}/`;
+
+
 type Rule = {
   id: string;
   title: string;
@@ -52,44 +58,51 @@ export default function OsloobLanding() {
 
   // Load manifest + markdown bodies at runtime
   useEffect(() => {
-    (async () => {
-      try {
-        const res = await fetch('/content/manifest.json', { cache: 'no-store' });
-        if (!res.ok) return;
-        const m: Rule[] = await res.json();
-        const withBodies: Rule[] = await Promise.all(m.map(async r => {
-          if (r.bodyPath) {
-            try { r.body = await fetch(r.bodyPath).then(x=>x.text()); } catch {}
-          }
-          return r;
-        }));
-        setRules(withBodies);
-      } catch {}
-    })();
-  }, []);
+  (async () => {
+    try {
+      // manifest باید در public/content/manifest.json باشد
+      const res = await fetch(toPath("/content/manifest.json"), { cache: "no-store" });
+      if (!res.ok) return; // اگر نبود، همان seed می‌ماند
+      const m: Rule[] = await res.json();
+      const withBodies = await Promise.all(m.map(async r => {
+        if (r.bodyPath) {
+          try {
+            const mdRes = await fetch(toPath(r.bodyPath));
+            if (mdRes.ok) r.body = await mdRes.text();
+          } catch {}
+        }
+        return r;
+      }));
+      setRules(withBodies);
+    } catch {}
+  })();
+}, []);
+
 
   // Simple SPA routing
   const openRule = (r: Rule) => {
     setActive(r); setPage('rule');
-    window.history.pushState({}, '', `/rules/${encodeURIComponent(r.id)}`);
+    window.history.pushState({}, '', rulesUrl(r.id));
   };
   const goHome = () => {
     setActive(null); setPage('home');
-    window.history.pushState({}, '', `/`);
+    window.history.pushState({}, '', homeUrl());
   };
   useEffect(() => {
-    const apply = () => {
-      const m = window.location.pathname.match(/^\/rules\/([^/]+)$/);
-      if (m) {
-        const r = rules.find(x => x.id === decodeURIComponent(m[1]));
-        if (r) { setActive(r); setPage('rule'); return; }
-      }
-      setActive(null); setPage('home');
-    };
-    apply();
-    window.addEventListener('popstate', apply);
-    return () => window.removeEventListener('popstate', apply);
-  }, [rules]);
+  const apply = () => {
+    const esc = (s:string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const re = new RegExp(`^${esc(BASE)}/rules/([^/]+)$`);
+    const m = window.location.pathname.match(re);
+    if (m) {
+      const r = rules.find(x => x.id === decodeURIComponent(m[1]));
+      if (r) { setActive(r); setPage('rule'); return; }
+    }
+    setActive(null); setPage('home');
+  };
+  apply();
+  window.addEventListener('popstate', apply);
+  return () => window.removeEventListener('popstate', apply);
+}, [rules]);
 
   // bg parallax
   useEffect(() => {
@@ -99,12 +112,14 @@ export default function OsloobLanding() {
   }, []);
 
   const filtered = useMemo(() => {
-    const kw = q.trim();
-    return rules.filter(r =>
-      (cat==='all' || r.category === cat) &&
-      (kw==='' || r.title.includes(kw) || r.summary.includes(kw) || r.tags?.some(t=>t.includes(kw)))
-    );
-  }, [q,cat,rules]);
+  const kw = q.trim();
+  return rules.filter(
+    r =>
+      (cat === "all" || r.category === cat) &&
+      (kw === "" || r.title.includes(kw) || r.summary.includes(kw) || r.tags?.some(t => t.includes(kw)))
+  );
+}, [q, cat, rules]);
+
 
   const themeVars: React.CSSProperties =
     theme === "dark" ? {
