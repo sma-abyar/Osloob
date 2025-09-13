@@ -223,25 +223,18 @@ function BeforeAfter({ before, after }: { before?: string; after?: string }) {
 
 function BidiText({ text }: { text?: string }) {
   if (!text) return <span>—</span>;
-
-  // قطعه‌ها با | جدا می‌شن
   const parts = String(text).split("|");
-
   return (
     <span dir="rtl" className="whitespace-pre-wrap">
       {parts.map((p, i) => {
-        // 1) CRLF ویندوز → \n
-        // 2) بک‌اِسکِیپ‌های متنی "\\n" → newline واقعی "\n"
         const normalized = p.replace(/\r\n/g, "\n").replace(/\r/g, "\n").replace(/\\n/g, "\n");
-
         const lines = normalized.split("\n");
         return (
           <span key={i} className="inline">
             <bdi dir="auto" style={{ unicodeBidi: "isolate" }} className="align-middle">
               {lines.map((ln, idx) => (
                 <React.Fragment key={idx}>
-                  {ln}
-                  {idx < lines.length - 1 && <br />}
+                  {ln}{idx < lines.length - 1 && <br />}
                 </React.Fragment>
               ))}
             </bdi>
@@ -252,6 +245,7 @@ function BidiText({ text }: { text?: string }) {
     </span>
   );
 }
+
 
 
 
