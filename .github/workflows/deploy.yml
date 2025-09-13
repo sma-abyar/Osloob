@@ -2,8 +2,8 @@ name: Deploy Vite site to GitHub Pages
 
 on:
   push:
-    branches: [ main ]   # اگر شاخه‌ی اصلیت چیز دیگری است، همین‌جا عوض کن
-  workflow_dispatch:     # امکان اجرا دستی
+    branches: [ main ]
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -33,7 +33,6 @@ jobs:
       - name: Build
         run: npm run build
 
-      # SPA fallback: کپی index.html به 404.html تا رفرش روی /rules/[id] خطا نده
       - name: SPA 404 fallback
         run: cp dist/index.html dist/404.html
 
