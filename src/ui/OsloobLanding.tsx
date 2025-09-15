@@ -195,7 +195,7 @@ export default function OsloobLanding() {
 
 function RuleCard({ rule, onOpen }: { rule: Rule; onOpen: ()=>void }) {
   return (
-    <article className="group relative overflow-hidden rounded-3xl border border-[color:var(--glass-border)] bg-[color:var(--glass)] p-5 shadow-xl backdrop-blur-2xl transition sm:hover:scale-[1.01] hover:shadow-2xl transform-gpu [will-change:transform]">
+    <article className="[backface-visibility:hidden] group relative overflow-hidden rounded-3xl border border-[color:var(--glass-border)] bg-[color:var(--glass)] p-5 shadow-xl backdrop-blur-2xl transition sm:hover:scale-[1.01] hover:shadow-2xl transform-gpu [will-change:transform]">
       <div className="pointer-events-none absolute inset-0 rounded-3xl ring-1 ring-inset ring-transparent group-hover:ring-cyan-300/40" />
       <div className="pointer-events-none absolute inset-0 rounded-3xl bg-gradient-to-br from-white/20 to-transparent opacity-0 transition group-hover:opacity-40 mix-blend-soft-light dark:from-white/10 dark:group-hover:opacity-20" />
       <div className="relative flex items-start justify-between gap-3">
@@ -267,11 +267,11 @@ function BidiText({ text }: { text?: string }) {
 function RulePage({ rule, onBack }: { rule: Rule; onBack: ()=>void }) {
   const tint = catTint(rule.category);
   return (
-    <div className="fixed inset-0 z-50 overflow-auto p-4 bg-slate-900/40 backdrop-blur">
+    <div className="fixed inset-0 z-50 overflow-auto p-4 bg-slate-900/30 dark:bg-slate-900/50 backdrop-blur-md sm:backdrop-blur-lg modal-overlay">
       <div className="mx-auto w-full max-w-3xl">
-        <article className="relative overflow-hidden rounded-3xl border border-[color:var(--glass-border)] bg-[color:var(--glass)] p-6 shadow-2xl backdrop-blur-xl">
-          <div className="pointer-events-none absolute inset-0 rounded-3xl ring-1 ring-inset ring-white/30" />
-          <div className="pointer-events-none absolute inset-0 rounded-3xl bg-gradient-to-b from-white/60 to-white/30 opacity-80 mix-blend-luminosity dark:opacity-0" />
+        <article className="modal-content relative overflow-hidden rounded-3xl border border-[color:var(--glass-border)] bg-[color:var(--glass-strong)] p-6 shadow-2xl backdrop-blur-xl transform-gpu [will-change:transform] [backface-visibility:hidden]">
+          <div className="pointer-events-none absolute inset-0 rounded-3xl ring-1 ring-inset dark:ring-white/30 ring-slate-900/10" />
+          <div className="pointer-events-none absolute inset-0 rounded-3xl bg-gradient-to-b from-white/60 to-white/30 opacity-80 dark:mix-blend-luminosity mix-blend-normal dark:opacity-0" />
           <div className="relative flex items-center justify-between gap-3">
             <div className="flex items-center gap-2">
               <span className="rounded-full px-2 py-0.5 text-[10px] font-medium" style={{background:tint.bg, border:`1px solid ${tint.border}`, color:tint.text}}>{rule.category}</span>
